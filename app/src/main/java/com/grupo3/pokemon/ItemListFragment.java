@@ -2,6 +2,8 @@ package com.grupo3.pokemon;
 
 import android.content.ClipData;
 import android.content.ClipDescription;
+import android.content.Context;
+import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
 
@@ -10,6 +12,7 @@ import androidx.fragment.app.Fragment;
 import androidx.navigation.Navigation;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -17,12 +20,20 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.gson.GsonBuilder;
 import com.grupo3.pokemon.databinding.FragmentItemListBinding;
 import com.grupo3.pokemon.databinding.ItemListContentBinding;
 
 import com.grupo3.pokemon.placeholder.PlaceholderContent;
 
+import java.util.ArrayList;
 import java.util.List;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+import retrofit2.Retrofit;
+import retrofit2.converter.gson.GsonConverterFactory;
 
 /**
  * A fragment representing a list of Items. This fragment
@@ -81,16 +92,47 @@ public class ItemListFragment extends Fragment {
         // layout configuration (layout, layout-sw600dp)
         View itemDetailFragmentContainer = view.findViewById(R.id.item_detail_nav_container);
 
-        setupRecyclerView(recyclerView, itemDetailFragmentContainer);
+        // SOBRA setupRecyclerView(recyclerView, itemDetailFragmentContainer);
+
+        Retrofit retrofit = new Retrofit.Builder()
+                .baseUrl("https://pokeapi.co/api/v2/")
+                .addConverterFactory(GsonConverterFactory.create(
+                        new GsonBuilder().serializeNulls().create()
+                ))
+                .build();
+        PokemonAPIService pokemonApiService = retrofit.create(PokemonAPIService.class);
+        Call<PokemonFetchResults> call = pokemonApiService.getPokemons();
+
+        call.enqueue(new Callback<PokemonFetchResults>() {
+            @Override
+            public void onResponse(Call<PokemonFetchResults> call, Response<PokemonFetchResults> response) {
+                if (response.isSuccessful()) {
+                    ArrayList pokemonList = response.body().getResults();
+                    View recyclerView = getActivity().findViewById(R.id.item_list);
+                    assert recyclerView != null;
+                    setupRecyclerView((RecyclerView) recyclerView, itemDetailFragmentContainer, pokemonList);
+                } else {
+                    Log.d("Error", "Something happened");
+                    return;
+                }
+            }
+
+            @Override
+            public void onFailure(Call call, Throwable t) {
+                Log.d("Error", t.toString());
+            }
+        });
+
     }
 
     private void setupRecyclerView(
             RecyclerView recyclerView,
-            View itemDetailFragmentContainer
+            View itemDetailFragmentContainer,
+            ArrayList pokemonList
     ) {
 
         recyclerView.setAdapter(new SimpleItemRecyclerViewAdapter(
-                PlaceholderContent.ITEMS,
+                pokemonList,
                 itemDetailFragmentContainer
         ));
     }
@@ -124,6 +166,13 @@ public class ItemListFragment extends Fragment {
 
         @Override
         public void onBindViewHolder(final ViewHolder holder, int position) {
+
+            holder.mIdView.setText(Integer.toString(position));
+            holder.mContentView.setText(mValues.get(position).getName());
+
+            holder.itemView.setTag(position);
+            holder.itemView.setOnClickListener(mOnClickListener);
+
             holder.mIdView.setText(mValues.get(position).id);
             holder.mContentView.setText(mValues.get(position).content);
 
@@ -202,5 +251,23 @@ public class ItemListFragment extends Fragment {
             }
 
         }
+
+        private final View.OnClickListener mOnClickListener = new View.OnClickListener(){
+
+            @Override
+            public void onClick(View view) {
+
+                int index = (int) view.getTag();
+                Pokemon item = mValues.get(index);
+
+                Context context = view.getContext();
+                Intent intent = new Intent(context, ItemDetailFragment.class);
+                intent.putExtra(ItemDetailFragment.ARG_ITEM_ID, index + 1);
+                intent.putExtra(ItemDetailFragment.ARG_ITEM_NAME, item.getName());
+                intent.putExtra(ItemDetailFragment.ARG_DESCRIPTION, item.getDescription());
+
+                context.startActivity(intent);
+            }
+        };
     }
 }

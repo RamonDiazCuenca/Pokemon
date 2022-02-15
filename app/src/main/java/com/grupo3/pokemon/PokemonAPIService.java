@@ -6,5 +6,5 @@ import retrofit2.Call;
 public interface PokemonAPIService {
 
     @GET("pokemon/?limit=50")
-    Call getPokemons();
+    Call<PokemonFetchResults> getPokemons();
 }
