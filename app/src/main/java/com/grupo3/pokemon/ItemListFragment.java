@@ -107,7 +107,7 @@ public class ItemListFragment extends Fragment {
             @Override
             public void onResponse(Call<PokemonFetchResults> call, Response<PokemonFetchResults> response) {
                 if (response.isSuccessful()) {
-                    ArrayList pokemonList = response.body().getResults();
+                    ArrayList<Pokemon> pokemonList = response.body().getResults();
                     View recyclerView = getActivity().findViewById(R.id.item_list);
                     assert recyclerView != null;
                     setupRecyclerView((RecyclerView) recyclerView, itemDetailFragmentContainer, pokemonList);
@@ -128,7 +128,7 @@ public class ItemListFragment extends Fragment {
     private void setupRecyclerView(
             RecyclerView recyclerView,
             View itemDetailFragmentContainer,
-            ArrayList pokemonList
+            ArrayList<Pokemon> pokemonList
     ) {
 
         recyclerView.setAdapter(new SimpleItemRecyclerViewAdapter(
@@ -146,10 +146,10 @@ public class ItemListFragment extends Fragment {
     public static class SimpleItemRecyclerViewAdapter
             extends RecyclerView.Adapter<SimpleItemRecyclerViewAdapter.ViewHolder> {
 
-        private final List<PlaceholderContent.PlaceholderItem> mValues;
+        private final List<Pokemon> mValues;
         private final View mItemDetailFragmentContainer;
 
-        SimpleItemRecyclerViewAdapter(List<PlaceholderContent.PlaceholderItem> items,
+        SimpleItemRecyclerViewAdapter(List<Pokemon> items,
                                       View itemDetailFragmentContainer) {
             mValues = items;
             mItemDetailFragmentContainer = itemDetailFragmentContainer;
@@ -173,66 +173,52 @@ public class ItemListFragment extends Fragment {
             holder.itemView.setTag(position);
             holder.itemView.setOnClickListener(mOnClickListener);
 
-            holder.mIdView.setText(mValues.get(position).id);
-            holder.mContentView.setText(mValues.get(position).content);
-
             holder.itemView.setTag(mValues.get(position));
-            holder.itemView.setOnClickListener(itemView -> {
-                PlaceholderContent.PlaceholderItem item =
-                        (PlaceholderContent.PlaceholderItem) itemView.getTag();
-                Bundle arguments = new Bundle();
-                arguments.putString(ItemDetailFragment.ARG_ITEM_ID, item.id);
-                if (mItemDetailFragmentContainer != null) {
-                    Navigation.findNavController(mItemDetailFragmentContainer)
-                            .navigate(R.id.fragment_item_detail, arguments);
-                } else {
-                    Navigation.findNavController(itemView).navigate(R.id.show_item_detail, arguments);
-                }
-            });
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                /*
-                 * Context click listener to handle Right click events
-                 * from mice and trackpad input to provide a more native
-                 * experience on larger screen devices
-                 */
-                holder.itemView.setOnContextClickListener(v -> {
-                    PlaceholderContent.PlaceholderItem item =
-                            (PlaceholderContent.PlaceholderItem) holder.itemView.getTag();
-                    Toast.makeText(
-                            holder.itemView.getContext(),
-                            "Context click of item " + item.id,
-                            Toast.LENGTH_LONG
-                    ).show();
-                    return true;
-                });
-            }
-            holder.itemView.setOnLongClickListener(v -> {
-                // Setting the item id as the clip data so that the drop target is able to
-                // identify the id of the content
-                ClipData.Item clipItem = new ClipData.Item(mValues.get(position).id);
-                ClipData dragData = new ClipData(
-                        ((PlaceholderContent.PlaceholderItem) v.getTag()).content,
-                        new String[]{ClipDescription.MIMETYPE_TEXT_PLAIN},
-                        clipItem
-                );
 
-                if (Build.VERSION.SDK_INT >= 24) {
-                    v.startDragAndDrop(
-                            dragData,
-                            new View.DragShadowBuilder(v),
-                            null,
-                            0
-                    );
-                } else {
-                    v.startDrag(
-                            dragData,
-                            new View.DragShadowBuilder(v),
-                            null,
-                            0
-                    );
-                }
-                return true;
-            });
+//            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+//                /*
+//                 * Context click listener to handle Right click events
+//                 * from mice and trackpad input to provide a more native
+//                 * experience on larger screen devices
+//                 */
+//                holder.itemView.setOnContextClickListener(v -> {
+//                    Pokemon item =
+//                            (Pokemon) holder.itemView.getTag();
+//                    Toast.makeText(
+//                            holder.itemView.getContext(),
+//                            "Context click of item " + item.id,
+//                            Toast.LENGTH_LONG
+//                    ).show();
+//                    return true;
+//                });
+//            }
+//            holder.itemView.setOnLongClickListener(v -> {
+//                // Setting the item id as the clip data so that the drop target is able to
+//                // identify the id of the content
+//                ClipData.Item clipItem = new ClipData.Item(mValues.get(position).id);
+//                ClipData dragData = new ClipData(
+//                        ((Pokemon) v.getTag()).content,
+//                        new String[]{ClipDescription.MIMETYPE_TEXT_PLAIN},
+//                        clipItem
+//                );
+//
+//                if (Build.VERSION.SDK_INT >= 24) {
+//                    v.startDragAndDrop(
+//                            dragData,
+//                            new View.DragShadowBuilder(v),
+//                            null,
+//                            0
+//                    );
+//                } else {
+//                    v.startDrag(
+//                            dragData,
+//                            new View.DragShadowBuilder(v),
+//                            null,
+//                            0
+//                    );
+//                }
+//                return true;
+//            });
         }
 
         @Override
@@ -252,21 +238,26 @@ public class ItemListFragment extends Fragment {
 
         }
 
+
         private final View.OnClickListener mOnClickListener = new View.OnClickListener(){
 
             @Override
             public void onClick(View view) {
 
                 int index = (int) view.getTag();
-                Pokemon item = mValues.get(index);
 
-                Context context = view.getContext();
-                Intent intent = new Intent(context, ItemDetailFragment.class);
-                intent.putExtra(ItemDetailFragment.ARG_ITEM_ID, index + 1);
-                intent.putExtra(ItemDetailFragment.ARG_ITEM_NAME, item.getName());
-                intent.putExtra(ItemDetailFragment.ARG_DESCRIPTION, item.getDescription());
+                Pokemon item = (Pokemon) view.getTag();
+                Bundle arguments = new Bundle();
+                arguments.putInt(ItemDetailFragment.ARG_ITEM_ID, index + 1);
+                arguments.putString(ItemDetailFragment.ARG_ITEM_ID, item.getName());
+                arguments.putString(ItemDetailFragment.ARG_ITEM_ID, item.getDescription());
 
-                context.startActivity(intent);
+                if (mItemDetailFragmentContainer != null) {
+                    Navigation.findNavController(mItemDetailFragmentContainer)
+                            .navigate(R.id.fragment_item_detail, arguments);
+                } else {
+                    Navigation.findNavController(view).navigate(R.id.show_item_detail, arguments);
+                }
             }
         };
     }

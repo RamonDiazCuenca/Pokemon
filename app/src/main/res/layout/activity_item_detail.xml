@@ -6,20 +6,33 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <com.google.android.material.appbar.CollapsingToolbarLayout
+    <androidx.fragment.app.FragmentContainerView
         android:id="@+id/nav_host_fragment_item_detail"
+        android:name="androidx.navigation.fragment.NavHostFragment"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:defaultNavHost="true"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:navGraph="@navigation/primary_details_nav_graph"
+        tools:layout="@layout/fragment_item_detail">
+
+    </androidx.fragment.app.FragmentContainerView>
+
+    <Toolbar
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
-        <ImageView
-            android:id="@+id/item_image"
-            android:layout_width="240dp"
-            android:layout_height="240dp"
-            android:layout_gravity="center_horizontal"
-            android:scaleType="center"
-            android:visibility="visible"
-            tools:src="@drawable/ic_launcher_background"/>
+    <ImageView
+        android:id="@+id/item_image"
+        android:layout_width="240dp"
+        android:layout_height="240dp"
+        android:layout_gravity="center_horizontal"
+        android:scaleType="center"
+        android:visibility="visible"/>
 
-    </com.google.android.material.appbar.CollapsingToolbarLayout>
+    </Toolbar>
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>
