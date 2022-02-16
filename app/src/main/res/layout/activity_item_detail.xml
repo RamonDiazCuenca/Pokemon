@@ -18,21 +18,6 @@
         app:layout_constraintTop_toTopOf="parent"
         app:navGraph="@navigation/primary_details_nav_graph"
         tools:layout="@layout/fragment_item_detail">
-
     </androidx.fragment.app.FragmentContainerView>
-
-    <Toolbar
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content">
-
-    <ImageView
-        android:id="@+id/item_image"
-        android:layout_width="240dp"
-        android:layout_height="240dp"
-        android:layout_gravity="center_horizontal"
-        android:scaleType="center"
-        android:visibility="visible"/>
-
-    </Toolbar>
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

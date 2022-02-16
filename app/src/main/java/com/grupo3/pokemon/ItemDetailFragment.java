@@ -1,67 +1,43 @@
 package com.grupo3.pokemon;
 
-import android.content.ClipData;
 import android.os.Bundle;
-import android.view.DragEvent;
 
 import androidx.fragment.app.Fragment;
 
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.bumptech.glide.Glide;
 import com.google.android.material.appbar.CollapsingToolbarLayout;
-import com.grupo3.pokemon.placeholder.PlaceholderContent;
 import com.grupo3.pokemon.databinding.FragmentItemDetailBinding;
 
-/**
- * A fragment representing a single Item detail screen.
- * This fragment is either contained in a {@link ItemListFragment}
- * in two-pane mode (on larger screen devices) or self-contained
- * on handsets.
- */
 public class ItemDetailFragment extends Fragment {
 
-    /**
-     * The fragment argument representing the item ID that this fragment
-     * represents.
-     */
-    public static final String ARG_ITEM_ID = "item_id";
+    public static final Integer ARG_ITEM_ID = 0;
+    public static final String ARG_ITEM_NAME = "item_name";
+    public static final String ARG_DESCRIPTION = "item_description";
 
-    /**
-     * The placeholder content this fragment is presenting.
-     */
-    private PlaceholderContent.PlaceholderItem mItem;
+    private Integer mItemId;
+    private String mItemName;
+    private String mItemDescription;
+
+
     private CollapsingToolbarLayout mToolbarLayout;
     private TextView mTextView;
 
-    private final View.OnDragListener dragListener = (v, event) -> {
-        if (event.getAction() == DragEvent.ACTION_DROP) {
-            ClipData.Item clipDataItem = event.getClipData().getItemAt(0);
-            mItem = PlaceholderContent.ITEM_MAP.get(clipDataItem.getText().toString());
-            updateContent();
-        }
-        return true;
-    };
     private FragmentItemDetailBinding binding;
-
-    /**
-     * Mandatory empty constructor for the fragment manager to instantiate the
-     * fragment (e.g. upon screen orientation changes).
-     */
-    public ItemDetailFragment() {
-    }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        if (getArguments().containsKey(ARG_ITEM_ID)) {
-            // Load the placeholder content specified by the fragment
-            // arguments. In a real-world scenario, use a Loader
-            // to load content from a content provider.
-            mItem = PlaceholderContent.ITEM_MAP.get(getArguments().getString(ARG_ITEM_ID));
+        if (getArguments().containsKey(String.valueOf(ARG_ITEM_ID))) {
+            mItemId = getArguments().getInt(String.valueOf(ARG_ITEM_ID));
+            mItemName = getArguments().getString(ARG_ITEM_NAME);
+            mItemDescription = getArguments().getString(ARG_DESCRIPTION);
         }
     }
 
@@ -75,9 +51,7 @@ public class ItemDetailFragment extends Fragment {
         mToolbarLayout = rootView.findViewById(R.id.toolbar_layout);
         mTextView = binding.itemDetail;
 
-        // Show the placeholder content as text in a TextView & in the toolbar if available.
         updateContent();
-        rootView.setOnDragListener(dragListener);
         return rootView;
     }
 
@@ -88,11 +62,16 @@ public class ItemDetailFragment extends Fragment {
     }
 
     private void updateContent() {
-        if (mItem != null) {
-            mTextView.setText(mItem.details);
+        if (mItemId != null) {
+            mTextView.setText(mItemDescription);
             if (mToolbarLayout != null) {
-                mToolbarLayout.setTitle(mItem.content);
+                mToolbarLayout.setTitle(mItemName);
             }
+            ImageView itemImage = binding.itemImage;
+            String pokemonImageUrl = "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/" + mItemId + ".png";
+            Glide.with(this)
+                    .load(pokemonImageUrl)
+                    .into(itemImage);
         }
     }
 }

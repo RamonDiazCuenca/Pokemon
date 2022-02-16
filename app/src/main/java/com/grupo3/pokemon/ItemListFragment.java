@@ -35,22 +35,8 @@ import retrofit2.Response;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
-/**
- * A fragment representing a list of Items. This fragment
- * has different presentations for handset and larger screen devices. On
- * handsets, the fragment presents a list of items, which when touched,
- * lead to a {@link ItemDetailFragment} representing
- * item details. On larger screens, the Navigation controller presents the list of items and
- * item details side-by-side using two vertical panes.
- */
 public class ItemListFragment extends Fragment {
 
-    /**
-     * Method to intercept global key events in the
-     * item list fragment to trigger keyboard shortcuts
-     * Currently provides a toast when Ctrl + Z and Ctrl + F
-     * are triggered
-     */
     ViewCompat.OnUnhandledKeyEventListenerCompat unhandledKeyEventListenerCompat = (v, event) -> {
         if (event.getKeyCode() == KeyEvent.KEYCODE_Z && event.isCtrlPressed()) {
             Toast.makeText(
@@ -88,11 +74,7 @@ public class ItemListFragment extends Fragment {
 
         RecyclerView recyclerView = binding.itemList;
 
-        // Leaving this not using view binding as it relies on if the view is visible the current
-        // layout configuration (layout, layout-sw600dp)
         View itemDetailFragmentContainer = view.findViewById(R.id.item_detail_nav_container);
-
-        // SOBRA setupRecyclerView(recyclerView, itemDetailFragmentContainer);
 
         Retrofit retrofit = new Retrofit.Builder()
                 .baseUrl("https://pokeapi.co/api/v2/")
@@ -147,12 +129,10 @@ public class ItemListFragment extends Fragment {
             extends RecyclerView.Adapter<SimpleItemRecyclerViewAdapter.ViewHolder> {
 
         private final List<Pokemon> mValues;
-        private final View mItemDetailFragmentContainer;
 
         SimpleItemRecyclerViewAdapter(List<Pokemon> items,
                                       View itemDetailFragmentContainer) {
             mValues = items;
-            mItemDetailFragmentContainer = itemDetailFragmentContainer;
         }
 
         @Override
@@ -172,53 +152,6 @@ public class ItemListFragment extends Fragment {
 
             holder.itemView.setTag(position);
             holder.itemView.setOnClickListener(mOnClickListener);
-
-            holder.itemView.setTag(mValues.get(position));
-
-//            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-//                /*
-//                 * Context click listener to handle Right click events
-//                 * from mice and trackpad input to provide a more native
-//                 * experience on larger screen devices
-//                 */
-//                holder.itemView.setOnContextClickListener(v -> {
-//                    Pokemon item =
-//                            (Pokemon) holder.itemView.getTag();
-//                    Toast.makeText(
-//                            holder.itemView.getContext(),
-//                            "Context click of item " + item.id,
-//                            Toast.LENGTH_LONG
-//                    ).show();
-//                    return true;
-//                });
-//            }
-//            holder.itemView.setOnLongClickListener(v -> {
-//                // Setting the item id as the clip data so that the drop target is able to
-//                // identify the id of the content
-//                ClipData.Item clipItem = new ClipData.Item(mValues.get(position).id);
-//                ClipData dragData = new ClipData(
-//                        ((Pokemon) v.getTag()).content,
-//                        new String[]{ClipDescription.MIMETYPE_TEXT_PLAIN},
-//                        clipItem
-//                );
-//
-//                if (Build.VERSION.SDK_INT >= 24) {
-//                    v.startDragAndDrop(
-//                            dragData,
-//                            new View.DragShadowBuilder(v),
-//                            null,
-//                            0
-//                    );
-//                } else {
-//                    v.startDrag(
-//                            dragData,
-//                            new View.DragShadowBuilder(v),
-//                            null,
-//                            0
-//                    );
-//                }
-//                return true;
-//            });
         }
 
         @Override
@@ -245,19 +178,14 @@ public class ItemListFragment extends Fragment {
             public void onClick(View view) {
 
                 int index = (int) view.getTag();
+                Pokemon item = mValues.get(index);
 
-                Pokemon item = (Pokemon) view.getTag();
                 Bundle arguments = new Bundle();
-                arguments.putInt(ItemDetailFragment.ARG_ITEM_ID, index + 1);
-                arguments.putString(ItemDetailFragment.ARG_ITEM_ID, item.getName());
-                arguments.putString(ItemDetailFragment.ARG_ITEM_ID, item.getDescription());
+                arguments.putInt(String.valueOf((ItemDetailFragment.ARG_ITEM_ID)),(index + 1));
+                arguments.putString(ItemDetailFragment.ARG_ITEM_NAME, item.getName());
+                arguments.putString(ItemDetailFragment.ARG_DESCRIPTION, item.getDescription());
 
-                if (mItemDetailFragmentContainer != null) {
-                    Navigation.findNavController(mItemDetailFragmentContainer)
-                            .navigate(R.id.fragment_item_detail, arguments);
-                } else {
-                    Navigation.findNavController(view).navigate(R.id.show_item_detail, arguments);
-                }
+                Navigation.findNavController(view).navigate(R.id.show_item_detail, arguments);
             }
         };
     }
